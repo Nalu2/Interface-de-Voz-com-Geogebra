@@ -1,42 +1,50 @@
-recognition.onresult = async function(event) {
-  for (let i = event.resultIndex; i < event.results.length; i++) {
-    if (event.results[i].isFinal) {
-      const falaProfessor = event.results[i][0].transcript.trim();
-      output.textContent = "Processando: " + falaProfessor;
+import google.generativeai as genai
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 
-      // ENVIANDO PARA A IA TRADUZIR
-      const comandoGGB = await traduzirComIA(falaProfessor);
-      
-      if (comandoGGB) {
-        ggbApplet.evalCommand(comandoGGB); // Executa no GeoGebra
-        falarFeedback("Comando executado: " + falaProfessor); // Feedback Auditivo [cite: 33]
-      }
-    }
-  }
-};
+app = Flask(__name__)
+CORS(app)
 
-// Função que simula a chamada para a IA
-async function traduzirComIA(texto) {
-  try {
-    // Aqui você chamaria seu backend (Python/Node) que contém a chave da API
-    // O Prompt deve instruir a IA a retornar APENAS o comando GGBScript 
-    const response = await fetch('/api/traduzir', {
-      method: 'POST',
-      body: JSON.stringify({ prompt: texto }),
-      headers: { 'Content-Type': 'application/json' }
-    });
-    const data = await response.json();
-    return data.comando; // Ex: "Círculo((0,0), 3)"
-  } catch (e) {
-    console.error("Erro na tradução da IA", e);
-    return null;
-  }
-}
+# Configuração correta para chave AIzaSy (Google Gemini)
+CHAVE_API = "AIzaSyCQKiG7WydyA6T-PRxeg5s08Q7OVr94VCw" 
+genai.configure(api_key=CHAVE_API)
+model = genai.GenerativeModel('gemini-1.5-pro')
 
-// Função de Acessibilidade: O sistema fala com o docente [cite: 33]
-function falarFeedback(mensagem) {
-  const synth = window.speechSynthesis;
-  const utterThis = new SpeechSynthesisUtterance(mensagem);
-  utterThis.lang = 'pt-BR';
-  synth.speak(utterThis);
-}
+# ... (restante do código igual)
+
+SYSTEM_PROMPT = """
+Você é um tradutor RIGOROSO de linguagem natural para GeoGebra Script (GGBScript).
+REGRAS OBRIGATÓRIAS:
+1. Responda APENAS o comando técnico. 
+2. NUNCA use markdown, blocos de código (```), ou explicações.
+3. Se o usuário disser "Desenhe um círculo de raio 3", responda apenas: Círculo((0,0), 3)
+4. Se não entender, responda: ERRO
+"""
+
+@app.route('/traduzir', methods=['POST'])
+def traduzir():
+    dados = request.json
+    texto_professor = dados.get('texto', '')
+
+    try:
+        # Usando um prompt mais direto
+        full_prompt = f"{SYSTEM_PROMPT}\n\nConverter: {texto_professor}"
+        response = model.generate_content(full_prompt)
+        
+        # LIMPEZA PROFUNDA: remove espaços, aspas e blocos de código
+        comando = response.text.strip().replace("```", "").replace("ggb", "").replace("javascript", "")
+        
+        # Log para você ver no terminal exatamente o que a IA escreveu
+        print(f"DEBUG - IA recebeu: {texto_professor}")
+        print(f"DEBUG - IA respondeu: '{comando}'")
+
+        if not comando or "ERRO" in comando.upper():
+            return jsonify({"comando": None, "erro": "IA confusa"}), 200
+            
+        return jsonify({"comando": comando})
+    except Exception as e:
+        print(f"Erro Grave: {e}")
+        return jsonify({"erro": str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
