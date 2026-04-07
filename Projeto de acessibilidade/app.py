@@ -1,37 +1,49 @@
+import google.generativeai as genai
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import openai 
 
 app = Flask(__name__)
-CORS(app) # Permite que o frontend fale com o backend
+CORS(app)
 
-# Configure sua chave de API aqui
-CHAVE_API = "AIzaSyCQKiG7WydyA6T-PRxeg5s08Q7OVr94VCw"
+# Configuração correta para chave AIzaSy (Google Gemini)
+CHAVE_API = "AIzaSyCQKiG7WydyA6T-PRxeg5s08Q7OVr94VCw" 
+genai.configure(api_key=CHAVE_API)
+model = genai.GenerativeModel('gemini-1.5-pro')
+
+# ... (restante do código igual)
 
 SYSTEM_PROMPT = """
-Você é um compilador especializado em converter linguagem natural pedagógica para comandos de GeoGebra Script (GGBScript). Sua função é apoiar um docente cego na criação de gráficos.
-Regras de Ouro:
-Responda APENAS com o comando técnico do GeoGebra. Nunca use Markdown (como ```), nunca explique e nunca peça desculpas.
-Se o usuário disser 'Crie uma função quadrática padrão', responda: f(x) = x^2
-Se o usuário der uma instrução de cor ou estilo, anexe o comando correspondente: Ex: 'Círculo de raio 2 vermelho' -> Círculo((0,0), 2); DefinirCor(c1, "Red")
-Se o comando for ambíguo, escolha a interpretação matemática mais comum no Ensino Superior.
-Idioma de entrada: Português (Brasil). Saída: Comandos GeoGebra.
+Você é um tradutor RIGOROSO de linguagem natural para GeoGebra Script (GGBScript).
+REGRAS OBRIGATÓRIAS:
+1. Responda APENAS o comando técnico. 
+2. NUNCA use markdown, blocos de código (```), ou explicações.
+3. Se o usuário disser "Desenhe um círculo de raio 3", responda apenas: Círculo((0,0), 3)
+4. Se não entender, responda: ERRO
 """
 
 @app.route('/traduzir', methods=['POST'])
 def traduzir():
     dados = request.json
-    texto_professor = dados.get('texto')
+    texto_professor = dados.get('texto', '')
 
-    # Chamada à IA (Exemplo com GPT/Gemini) [cite: 23]
-    # Aqui implementamos o Chain-of-Thought para precisão [cite: 24]
     try:
-        # Lógica de integração com a API da sua escolha
-        # Simulação de retorno da IA:
-        comando_gerado = "Círculo((0,0), 5)" # O retorno real viria da API
+        # Usando um prompt mais direto
+        full_prompt = f"{SYSTEM_PROMPT}\n\nConverter: {texto_professor}"
+        response = model.generate_content(full_prompt)
         
-        return jsonify({"comando": comando_gerado})
+        # LIMPEZA PROFUNDA: remove espaços, aspas e blocos de código
+        comando = response.text.strip().replace("```", "").replace("ggb", "").replace("javascript", "")
+        
+        # Log para você ver no terminal exatamente o que a IA escreveu
+        print(f"DEBUG - IA recebeu: {texto_professor}")
+        print(f"DEBUG - IA respondeu: '{comando}'")
+
+        if not comando or "ERRO" in comando.upper():
+            return jsonify({"comando": None, "erro": "IA confusa"}), 200
+            
+        return jsonify({"comando": comando})
     except Exception as e:
+        print(f"Erro Grave: {e}")
         return jsonify({"erro": str(e)}), 500
 
 if __name__ == '__main__':
