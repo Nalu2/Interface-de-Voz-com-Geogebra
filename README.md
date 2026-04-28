@@ -79,10 +79,10 @@ Clique em **"Iniciar Comando de Voz"** e fale um comando como:
 
 ## Estrutura do projeto
 projeto/
-├── index.html   # Interface principal
-├── app.js       # Lógica de voz e comunicação
-├── style.css    # Estilos
-└── server.py    # Servidor Flask + integração Gemini
+index.html   # Interface principal
+app.js       # Lógica de voz e comunicação
+style.css    # Estilos
+server.py    # Servidor Flask + integração Gemini
 
 ---
 
