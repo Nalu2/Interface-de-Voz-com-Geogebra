@@ -7,87 +7,26 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Interface de Voz para Docentes (STEM)</h1>
+
+<h1>Interface de Voz para Docentes STEM</h1>
 <div id="ggb-element"></div>
 
 <div class="controls">
-    <button id="start-btn"> Iniciar Comando de Voz</button>
-    <div style="margin-top: 15px; background: #f9f9f9; padding: 10px; border-radius: 5px;">
-        <strong>Ouvido agora:</strong> <span id="transcricao-ao-vivo">...</span>
+    <button id="start-btn">🎤 Iniciar Comando de Voz</button>
+
+    <div class="caixa" aria-live="polite">
+        <small>Ouvido agora</small>
+        <div id="transcricao-ao-vivo">Aguardando...</div>
     </div>
-    <p id="status">Aguardando comando...</p>
+
+    <p id="status" role="status">Aguardando comando...</p>
+
+    <div class="caixa">
+        <small>Histórico</small>
+        <ul id="historico-lista"></ul>
+    </div>
 </div>
 
-<script>
-    // Inicialização do GeoGebra 
-    var params = { "appName": "graphing", "width": 800, "height": 600, "showAlgebraInput": true };
-    var applet = new GGBApplet(params, true);
-    window.onload = () => applet.inject('ggb-element');
-
-    const btn = document.querySelector('#start-btn');
-    const status = document.querySelector('#status');
-    const liveText = document.querySelector('#transcricao-ao-vivo');
-
-    // Captura de Voz e Integração 
-    function startRecognition() {
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.lang = 'pt-BR';
-        recognition.continuous = false; // Foca em um comando por vez para evitar erros
-        recognition.interimResults = true; // Permite ver o texto enquanto fala
-
-        recognition.onstart = () => {
-            status.textContent = " Ouvindo professor...";
-            btn.style.background = "#dc3545";
-        };
-
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            liveText.textContent = transcript; // Escreve na tela em tempo real
-
-            if (event.results[0].isFinal) {
-                processarComando(transcript);
-            }
-        };
-
-        recognition.onerror = () => {
-            status.textContent = "Erro no microfone. Tente novamente.";
-            btn.style.background = "#007bff";
-        };
-
-        recognition.start();
-    }
-
-    async function processarComando(texto) {
-        status.textContent = " IA interpretando...";
-        try {
-            const response = await fetch('[http://127.0.0.1:5000/traduzir](http://127.0.0.1:5000/traduzir)', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ texto: texto })
-            });
-            const data = await response.json();
-
-            if (data.comando && data.comando !== "ERRO") {
-                ggbApplet.evalCommand(data.comando);
-                status.textContent = " Executado: " + data.comando;
-                falar("Comando " + texto + " executado com sucesso.");
-            } else {
-                status.textContent = " Comando matemático não reconhecido.";
-                falar("Desculpe, não consegui converter '" + texto + "' em um comando matemático. Tente falar de outra forma.");
-            }
-        } catch (err) {
-            status.textContent = " Erro de servidor.";
-            falar("Erro de conexão com o servidor.");
-        }
-    }
-
-    function falarFeedback(msg) {
-        const utterance = new SpeechSynthesisUtterance(msg);
-        utterance.lang = 'pt-BR';
-        window.speechSynthesis.speak(utterance);
-    }
-
-    btn.onclick = startRecognition;
-</script>
+<script src="app.js"></script>
 </body>
 </html>
