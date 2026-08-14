@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InsideVox</title>
+  <script src="https://www.geogebra.org/apps/deployggb.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div id="sr-anuncio" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+
+  <div class="layout" role="application" aria-label="InsideVox — Plataforma de Comandos de Voz para GeoGebra">
+
+    <!-- PAINEL ESQUERDO -->
+    <aside class="panel panel--left" aria-label="Controles de voz">
+
+      <header class="brand" role="banner">
+        <div class="brand__icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </div>
+        <div class="brand__text">
+          <h1 class="brand__name">InsideVox</h1>
+          <p class="brand__subtitle">Plataforma de Comandos de Voz para GeoGebra</p>
+        </div>
+      </header>
+
+      <section class="controls" aria-label="Controle do microfone">
+
+        <button
+          id="btn-microfone"
+          class="btn-mic"
+          aria-label="Iniciar comando de voz"
+          aria-pressed="false"
+          aria-describedby="shortcut-hint"
+        >
+          <span class="btn-mic__icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          </span>
+          <span class="btn-mic__label">Comando de Voz</span>
+        </button>
+
+        <p id="shortcut-hint" class="shortcut-hint" aria-label="Atalho de teclado: tecla Espaço">
+          Atalho: <kbd>Espaço</kbd>
+        </p>
+
+        <div class="status-badge" role="status" aria-live="polite">
+          <span class="status-dot" id="status-dot" aria-hidden="true"></span>
+          <span id="status">Aguardando comando...</span>
+        </div>
+
+        <div class="transcricao-card">
+          <span class="card-eyebrow">TRANSCRIÇÃO RECONHECIDA</span>
+          <div
+            id="transcricao-ao-vivo"
+            class="transcricao-text"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            aria-label="Texto transcrito pelo reconhecimento de voz"
+          >Aguardando...</div>
+        </div>
+
+      </section>
+
+      <section class="sr-only" aria-label="Histórico de comandos">
+        <ul id="historico-lista" aria-label="Últimos comandos executados"></ul>
+      </section>
+
+      <footer class="panel--left__footer">
+        <span class="connection-badge" aria-label="Conectado ao GeoGebra">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+            <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+            <circle cx="12" cy="20" r="1" fill="currentColor"/>
+          </svg>
+          Conectado ao GeoGebra
+        </span>
+      </footer>
+
+    </aside>
+
+    <!-- PAINEL CENTRAL -->
+    <main class="panel panel--center" aria-label="Visualização GeoGebra e feedback auditivo">
+
+      <div class="center-header">
+        <span class="center-header__label">VISUALIZAÇÃO GEOGEBRA</span>
+      </div>
+
+      <section class="ggb-wrapper" aria-label="Quadro de construção matemática">
+        <div
+          id="ggb-elemento"
+          role="img"
+          aria-label="Área de visualização do GeoGebra. Use comandos de voz para criar elementos."
+        ></div>
+      </section>
+
+      <section class="feedback-bar" aria-label="Feedback auditivo do último comando">
+        <div class="feedback-bar__icon-wrap" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+          </svg>
+        </div>
+        <div class="feedback-bar__content">
+          <span class="card-eyebrow">FEEDBACK AUDITIVO</span>
+          <div
+            id="feedback-texto"
+            class="feedback-bar__text"
+            role="status"
+            aria-live="assertive"
+            aria-atomic="true"
+            aria-label="Resultado do último comando de voz"
+          >
+            <span class="feedback-placeholder">Aguardando primeiro comando...</span>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- PAINEL DIREITO -->
+    <aside class="panel panel--right" aria-label="Elementos presentes na tela do GeoGebra">
+
+      <div class="panel--right__inner">
+
+        <header class="right-header">
+          <div class="right-header__title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+            ELEMENTOS NA TELA
+          </div>
+          <p id="elementos-contador" class="right-header__counter" aria-live="polite" aria-atomic="true">
+            0 elementos carregados
+          </p>
+        </header>
+
+        <ul
+          id="lista-elementos"
+          class="elementos-lista"
+          aria-live="polite"
+          aria-relevant="additions removals"
+          aria-label="Lista de elementos matemáticos no GeoGebra"
+        >
+          <li class="elementos-vazio">Nenhum elemento na tela</li>
+        </ul>
+
+      </div>
+
+      <footer class="panel--right__footer">
+        <button
+          id="btn-ler-tudo"
+          class="btn-ler-tudo"
+          aria-label="Ler em voz alta todos os elementos presentes na tela"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          </svg>
+          Ler Tudo
+        </button>
+      </footer>
+
+    </aside>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
